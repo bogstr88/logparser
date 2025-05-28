@@ -8,6 +8,7 @@ TIME_FORMAT = '%H:%M:%S'
 def parse_log(file_path):
     jobs = defaultdict(dict)
     durations = []
+    unmatched_starts = []
 
     with open(file_path, 'r') as file:
         reader = csv.reader(file)
@@ -23,7 +24,7 @@ def parse_log(file_path):
                     start_time = jobs[pid]["start"]
                     if timestamp < start_time:
                         print(f"ERROR - END time earlier than START time for PID {pid}: {timestamp.time()} < {start_time.time()}")
-                        continue  # Skip this invalid entry
+                        continue 
 
                     duration = timestamp - start_time
                     durations.append({
@@ -36,9 +37,18 @@ def parse_log(file_path):
                     del jobs[pid]
                 else:
                     print(f"Unmatched END for PID {pid} at {timestamp_str}")
-    return durations
 
-def analyze_durations(durations):
+    # Any jobs without END time
+    for pid, info in jobs.items():
+        unmatched_starts.append({
+            "description": info["desc"],
+            "pid": pid,
+            "start": info["start"]
+        })
+
+    return durations, unmatched_starts
+
+def analyze_durations(durations, unmatched_starts):
     for job in durations:
         minutes = job["duration"].total_seconds() / 60
         status = ""
@@ -53,7 +63,14 @@ def analyze_durations(durations):
             f"took {job['duration']} from {job['start'].time()} to {job['end'].time()}"
         )
 
+    if unmatched_starts:
+        print("\n  Tasks that started but did not end:")
+        for job in unmatched_starts:
+            print(
+                f"INCOMPLETE - {job['description']} (PID {job['pid']}) started at {job['start'].time()}"
+            )
+
 if __name__ == "__main__":
     LOG_FILE_PATH = sys.argv[1]
-    durations = parse_log(LOG_FILE_PATH)
-    analyze_durations(durations)
+    durations, unmatched_starts = parse_log(LOG_FILE_PATH)
+    analyze_durations(durations, unmatched_starts)
