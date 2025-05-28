@@ -26,7 +26,7 @@ Output is printed to the console.
 ## Run Tests
 
 ```bash
-python -m unittest test_monitor.pys
+python -m unittest test_monitor.py
 ```
 
 ## Output Example
