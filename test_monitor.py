@@ -21,13 +21,13 @@ class TestMonitor(unittest.TestCase):
             },
             {
                 "description": "duration should be negative when end < start",
-                "pid": "67890",
+                "pid": "9990",
                 "start": datetime.strptime("12:00:00", "%H:%M:%S"),
                 "end": datetime.strptime("11:12:00", "%H:%M:%S"),
                 "duration": timedelta(minutes=48)
             }
         ]
-        analyze_durations(durations)
+        analyze_durations(durations, [])
 
 if __name__ == '__main__':
     unittest.main()
