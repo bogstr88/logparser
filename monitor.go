@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -58,12 +59,15 @@ func parseLog(filePath string) ([]Job, []StartOnlyJob, error) {
 			continue
 		}
 
+		event = strings.TrimSpace(event)
+
 		switch event {
 		case "START":
 			jobs[pid] = struct {
 				Description string
 				Start       time.Time
 			}{Description: description, Start: timestamp}
+
 		case "END":
 			if job, ok := jobs[pid]; ok {
 				if timestamp.Before(job.Start) {
